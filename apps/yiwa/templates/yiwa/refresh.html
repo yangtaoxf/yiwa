@@ -1,0 +1,22 @@
+{% extends "public/layout.html" %}
+
+{% block title %}刷新{% endblock title %}
+
+{% block content %}
+    <div class="text-center">
+        <h1>刷新成功，正在跳转到主页。。。</h1>
+    </div>
+{% endblock %}
+
+
+{% block js_custom %}
+    <script type="text/javascript">
+        $(function() {
+            // 延迟跳转
+            setInterval(function () {
+                $(window).attr('location','/home');
+            }, 3000);
+
+        });
+    </script>
+{% endblock %}

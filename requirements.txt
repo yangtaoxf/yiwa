@@ -1,0 +1,8 @@
+#Python36
+# Run pip install --requirement=requirements.txt to install al requirements
+
+baidu-aip    ==2.2.13.0
+Flask        ==1.0.3
+PyAudio      ==0.2.11
+selenium     ==3.141.0
+pocketsphinx ==0.1.15

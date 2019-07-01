@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}-伊瓦</title>
+    <link rel="stylesheet" href="{{ url_for('public.static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('public.static', filename='css/jquery-ui.min.css') }}">
+    {% block style_custom %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" style="margin-bottom: 0px;">
+            <img id="photo" src="" />
+            <span class="btn btn-default" id="myname">Hi，我叫伊瓦</span>
+            <span class="btn btn-primary" id="status">
+              <em id="explain_text">等待唤醒</em>
+            </span>
+            <span class="btn btn-default" id="caption">请对着麦克风，叫我的名字吧！</span>
+            <span class="btn btn-info" id="command">指令无效</span>
+        </nav>
+        <h2 class="text-center">{{ self.title() }}</h2>
+        {% block content %}{% endblock %}
+    </div>
+    <script src="{{ url_for('public.static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('public.static', filename='js/bootstrap.min.js') }}"></script>
+    {% block js_custom %}{% endblock %}
+    <script type="text/javascript">
+        $(function() {
+            // 定时刷新yiwa状态
+            function refresh_status() {
+                $.ajax({
+                    type: 'post',
+                    url: '/yiwa',
+                    data: "",
+                    cache: false,
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log(data);
+                        var status = data.result.status;
+                        var caption = data.result.caption;
+                        var stt = data.result.stt;
+                        if (status === 0) {
+                            $("#status").removeClass()
+                                .addClass("btn").addClass("btn-primary");
+                            $("#explain_text").text("等待唤醒");
+                        } else if (status === 1) {
+                            $("#status").removeClass()
+                                .addClass("btn").addClass("btn-success");
+                            $("#explain_text").text("已唤醒");
+                        } else {
+                            $("#status").removeClass()
+                                .addClass("btn").addClass("btn-danger");
+                            $("#explain_text").text("出错了");
+                        }
+                        $("#caption").text(caption);
+                        $("#command").text(stt);
+                    },
+                    error: function(e) {
+                      console.log('回调yiwa错误');
+                    }
+                });
+            }
+            refresh_status();
+            setInterval(refresh_status, 3000);
+        });
+    </script>
+</body>
+</html>

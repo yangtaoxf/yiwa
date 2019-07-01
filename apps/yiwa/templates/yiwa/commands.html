@@ -1,0 +1,27 @@
+{% extends "public/layout.html" %}
+
+{% block title %}指令目录{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+    {% for apps in result %}
+      <div class="row">
+        {% for (appname, commands), theme in apps %}
+          <div class="col-md-4">
+            <div class="panel panel-{{ theme }}">
+              <div class="panel-heading">
+                <h3 class="panel-title">{{ appname }}</h3>
+              </div>
+              <div class="panel-body" style="line-height: 38px;">
+                {% for command in commands %}
+                    <span class="btn btn-{{ theme }}">
+                        {{ command.name }}
+                    </span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    </div>
+{% endblock content %}

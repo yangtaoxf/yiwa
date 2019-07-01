@@ -1,0 +1,130 @@
+{% extends "public/layout.html" %}
+
+{% block title %}主页{% endblock title %}
+
+{% block style_custom %}
+    <link rel="stylesheet" href="{{ url_for('home.static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+    <!-- 时钟 -->
+    <div class="htmleaf-container">
+		<main>
+		  <canvas id="my-canvas"></canvas>
+		  <div id="clock">
+		    <div class="time-container hours">
+		      <div class="digit">
+		        <div class="fade">&nbsp;</div>
+		        <span class="num top" id="hour-tens-top">1</span>
+		        <span class="num bottom" id="hour-tens-bottom">
+		          <div class="bottom-container">1</div></span>
+		          <div class="swapper">
+		            <div id="top-hour-tens-anim" class="num-anim top-anim" style="display:none;">
+		              <div class="top-half-num">8</div>
+		            </div>
+		            <div id="bottom-hour-tens-anim" class="num-anim bottom-anim" style="display:none;">
+		              <div class="bottom-half-num">
+		                <div class="dropper">9</div></div>
+		            </div>
+		        </div>
+		        <div class="ring ring-left"></div>
+		        <div class="ring ring-right"></div>
+		      </div>
+		      <div class="digit">
+		        <div class="fade">&nbsp;</div>
+		        <span class="num top" id="hour-ones-top">9</span>
+		        <span class="num bottom" id="hour-ones-bottom">
+		          <div class="bottom-container">9</div></span>
+		          <div class="swapper">
+		            <div id="top-hour-ones-anim" class="num-anim top-anim" style="visibility: hidden;">
+		              <div class="top-half-num">3</div>
+		            </div>
+		            <div id="bottom-hour-ones-anim" class="num-anim bottom-anim" style="visibility: hidden;">
+		              <div class="bottom-half-num">
+		                <div class="dropper">9</div></div>
+		            </div>
+		        </div>
+		        <div class="ring ring-left"></div>
+		        <div class="ring ring-right"></div>
+		      </div>
+		    </div>
+		    <div class="time-container minutes">
+		      <div class="digit">
+		        <div class="fade">&nbsp;</div>
+		        <span class="num top" id="minute-tens-top">4</span>
+		        <span class="num bottom" id="minute-tens-bottom">
+		          <div class="bottom-container">4</div></span>
+		          <div class="swapper">
+		            <div id="top-minute-tens-anim" class="num-anim top-anim" style="display:none;">
+		              <div class="top-half-num">8</div>
+		            </div>
+		            <div id="bottom-minute-tens-anim" class="num-anim bottom-anim" style="display:none;">
+		              <div class="bottom-half-num">
+		                <div class="dropper">9</div></div>
+		            </div>
+		        </div>
+		        <div class="ring ring-left"></div>
+		        <div class="ring ring-right"></div>
+		      </div>
+		      <div class="digit">
+		        <div class="fade">&nbsp;</div>
+		        <span class="num top" id="minute-ones-top">8</span>
+		        <span class="num bottom" id="minute-ones-bottom">
+		          <div class="bottom-container">8</div></span>
+		          <div class="swapper">
+		            <div id="top-minute-ones-anim" class="num-anim top-anim" style="visibility: hidden;">
+		              <div class="top-half-num">7</div>
+		            </div>
+		            <div id="bottom-minute-ones-anim" class="num-anim bottom-anim" style="visibility: hidden;">
+		              <div class="bottom-half-num">
+		                <div class="dropper">8</div></div>
+		            </div>
+		        </div>
+		        <div class="ring ring-left"></div>
+		        <div class="ring ring-right"></div>
+		      </div>
+		    </div>
+		    <div class="time-container seconds">
+		      <div class="digit">
+		        <div class="fade">&nbsp;</div>
+		        <span class="num top" id="second-tens-top">4</span>
+		        <span class="num bottom" id="second-tens-bottom">
+		          <div class="bottom-container">4</div></span>
+		          <div class="swapper">
+		            <div id="top-second-tens-anim" class="num-anim top-anim" style="visibility: hidden;">
+		              <div class="top-half-num">3</div>
+		            </div>
+		            <div id="bottom-second-tens-anim" class="num-anim bottom-anim" style="visibility: hidden;">
+		              <div class="bottom-half-num">
+		                <div class="dropper">4</div></div>
+		            </div>
+		        </div>
+		        <div class="ring ring-left"></div>
+		        <div class="ring ring-right"></div>
+		      </div>
+		      <div class="digit">
+		        <div class="fade">&nbsp;</div>
+		        <span class="num top" id="second-ones-top">9</span>
+		        <span class="num bottom" id="second-ones-bottom">
+		          <div class="bottom-container">9</div></span>
+		          <div class="swapper">
+		            <div id="top-second-ones-anim" class="num-anim top-anim" style="visibility: hidden;">
+		              <div class="top-half-num">8</div>
+		            </div>
+		            <div id="bottom-second-ones-anim" class="num-anim bottom-anim" style="visibility: hidden;">
+		              <div class="bottom-half-num">
+		                <div class="dropper">9</div></div>
+		            </div>
+		        </div>
+		        <div class="ring ring-left"></div>
+		        <div class="ring ring-right"></div>
+		      </div>
+		    </div>
+		  </div>
+		</main>
+	</div>
+{% endblock content %}
+
+{% block js_custom %}
+    <script src="{{ url_for('home.static', filename='js/clock.js') }}" type="text/javascript"></script>
+{% endblock %}
