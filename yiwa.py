@@ -6,73 +6,16 @@ from asr.stt import listening, wakeup
 from asr.awake import read_keywords
 from nlp.comparison import match
 from importlib import import_module
-from web import HOST, PORT
+from yiwa.settings import HOST, PORT
 import time
-from utils.db import select, execute
-from utils.browser import create as create_browser
-from utils.log import Log
+from yiwa.db import DataConveyor
+from yiwa.browser import create as create_browser
+from yiwa.log import Log
+from jieba import lcut, lcut_for_search
 
 logger = Log().logger
 
 ROOT = f"http://{HOST}:{PORT}"
-
-
-class DataConveyor(object):
-    """yiwa数据交互类"""
-
-    def __init__(self):
-        super(DataConveyor, self).__init__()
-        self.init_captions = {
-            0: "请对着我，喊我的名字吧：",
-            1: "请对着我，说出指令吧：",
-            -1: "很抱歉，我出错了，请重启机器吧。",
-        }
-
-    def get_commands(self):
-        sql = "SELECT commands, action FROM commands ORDER BY hot DESC"
-        return select(sql)
-
-    def _init(self):
-        sql = "SELECT id FROM yiwa"
-        if select(sql):
-            self.sleep()
-        else:
-            sql_init_insert = f"""INSERT INTO yiwa(status, caption, stt) 
-                VALUES(0, "{self.init_captions.get(0)}", "暂无指令")
-                """
-            execute(sql_init_insert)
-
-    def sleep(self):
-        sql = f"""UPDATE yiwa SET status = 0,
-            caption="{self.init_captions.get(0)}",
-            stt="暂无指令"
-            """
-        execute(sql)
-
-    def wakeup(self):
-        sql = f"""UPDATE yiwa SET status = 1,
-            caption="{self.init_captions.get(1)}"
-            """
-        execute(sql)
-
-    def error(self):
-        sql = f"""UPDATE yiwa SET status = -1,
-            caption="{self.init_captions.get(-1)}"
-            """
-        execute(sql)
-
-    def stt(self, command):
-        sql = f"""UPDATE yiwa SET stt="{command}"
-        """
-        execute(sql)
-
-    def hot(self, action):
-        """增加动作的热度"""
-        sql = f"""UPDATE commands SET hot=hot+1 
-            WHERE action="{action}"
-            """
-        execute(sql)
-
 
 if __name__ == "__main__":
     WAKEUP = False
@@ -81,6 +24,7 @@ if __name__ == "__main__":
     data_conveyor._init()
     keywords = read_keywords()
     browser = create_browser()
+    browser.get(ROOT)
 
 
     def _todo(browser, action: str):
@@ -97,36 +41,72 @@ if __name__ == "__main__":
                 logger.error(f"动态执行页面动作失败：{e}")
 
 
+    def _command_filter(command):
+        """过滤指令，缩小遍历范围"""
+        # 相同指令
+        same_commands = data_conveyor.filter_command(command)
+        if same_commands:
+            return same_commands
+
+        # 分词匹配指令，有限的硬件资源环境不允许本地NLP
+        all_commands = data_conveyor.all_command()
+
+        def __filter_by_words(_words):
+            actions = []
+            for commands, action in all_commands:
+                for _word in _words:
+                    if _word in commands:
+                        actions.append(action)
+            return data_conveyor.filter_command_by_actions(set(actions))
+
+        # 像似分词 https://cuiqingcai.com/5844.html
+        cut_words = lcut_for_search(command)
+        like_commands = __filter_by_words(cut_words)
+        if like_commands:
+            return like_commands
+
+        # 模糊分词
+        cut_all_words = lcut(command, cut_all=True)
+        vague_commands = __filter_by_words(cut_all_words)
+        if vague_commands:
+            return vague_commands
+
+        # 无匹配
+        return []
+
+
     def _exec():
         """执行指令"""
         access = False  # 成功执行指令
         voice2text = listening()
-        logger.info(f"指令>>> {voice2text}")
-        print(f"指令>>> {voice2text}")
+        logger.info(f"发出指令>>> {voice2text}")
+        data_conveyor.stt(voice2text)
         if voice2text is None:
-            logger.info("空指令")
-            data_conveyor.stt("指令无效")
             return access
 
-        for commands, action in data_conveyor.get_commands():
+        print(_command_filter(voice2text))
+
+        for commands, action in _command_filter(voice2text):
             found = False  # 指令是否已找到
             for command in commands.split(","):
                 if match(voice2text, command):
-                    data_conveyor.stt(command)  # 指令入库
+                    logger.info(f"指令命中: {command}")
+                    data_conveyor.access(command)  # 指令入库
                     if action.startswith("/"):
                         # 页面访问
                         browser.get(ROOT + action)
                     else:
                         # 页面动作
                         _todo(browser, action)
-                    data_conveyor.hot(action)   # +指令热度
+                    data_conveyor.hot(action)  # +指令热度
                     found = True
                     break
             if found:
                 access = True
                 break
         else:
-            logger.info("指令不匹配")
+            logger.info("~_~ 指令不匹配")
+            data_conveyor.info("~_~ 指令不匹配")
         return access
 
 
@@ -136,21 +116,22 @@ if __name__ == "__main__":
                 FAILURE = 0 if _exec() else (FAILURE + 1)
             else:
                 word, up = wakeup(keywords)
+                data_conveyor.stt(word)
                 if up:
-                    logger.info("唤醒成功")
                     WAKEUP = True
-                    FAILURE = 0 if _exec() else (FAILURE + 1)
+                    logger.info("^_^ 唤醒成功")
                     data_conveyor.wakeup()
-                    data_conveyor.stt(word)
+                    FAILURE = 0 if _exec() else (FAILURE + 1)
                 else:
-                    data_conveyor.stt("指令无效")
+                    data_conveyor.stt("")
             # 10次超时， 睡眠
             if FAILURE >= 10:
-                logger.info("睡眠待命")
+                logger.info("--! 睡眠待命")
+                data_conveyor.sleep()
                 WAKEUP = False
                 FAILURE = 0
-                data_conveyor.sleep()
-        except:
+        except Exception as e:
+            logger.error(f"接收语音错误，{e}")
             data_conveyor.error()
 
         time.sleep(1)

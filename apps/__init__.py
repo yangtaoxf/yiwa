@@ -1,6 +1,7 @@
 # coding: utf8
 import os
 from flask import Flask, Blueprint
+from flask_socketio import SocketIO
 from importlib import import_module
 
 apps_path = __path__[0]
@@ -12,6 +13,8 @@ def _app_resource_path(app: str, dir: str):
 
 # 定义应用
 app = Flask(__name__)
+# app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
 
 
 # 根目录模块文件夹名称

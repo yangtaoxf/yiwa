@@ -3,15 +3,14 @@
 """yiwa-WEB后端"""
 
 from __future__ import absolute_import
-from apps import app
-from utils.io import scan_apps
-from utils.db import execute, executemany
+from apps import app, socketio
+from yiwa.io import scan_apps
+from yiwa.db import execute, executemany
 import subprocess
-from utils.log import Log
+from yiwa.log import Log
 from flask import redirect, render_template
-
-HOST = "localhost"
-PORT = 5000
+from tdcode import qr_code
+from yiwa.settings import HOST, PORT
 
 
 @app.route('/')
@@ -65,5 +64,6 @@ def reboot():
 
 if __name__ == '__main__':
     refresh()
+    qr_code.clean_all()
     app.logger.addHandler(Log().handler)
-    app.run(host=HOST, port=PORT)
+    socketio.run(app, host=HOST, port=PORT)

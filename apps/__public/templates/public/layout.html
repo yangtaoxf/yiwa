@@ -2,6 +2,7 @@
 <html lang="zh-cn">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="{{ url_for('public.static', filename='image/favicon.ico') }}">
     <title>{% block title %}{% endblock %}-伊瓦</title>
     <link rel="stylesheet" href="{{ url_for('public.static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('public.static', filename='css/jquery-ui.min.css') }}">
@@ -10,58 +11,74 @@
 <body>
     <div class="container">
         <nav class="navbar navbar-expand-lg navbar-light bg-light" style="margin-bottom: 0px;">
-            <img id="photo" src="" />
+            <img style="width:35px;" id="photo" src="{{ url_for('public.static', filename='image/logo.png') }}" />
             <span class="btn btn-default" id="myname">Hi，我叫伊瓦</span>
             <span class="btn btn-primary" id="status">
               <em id="explain_text">等待唤醒</em>
             </span>
             <span class="btn btn-default" id="caption">请对着麦克风，叫我的名字吧！</span>
-            <span class="btn btn-info" id="command">指令无效</span>
+            <span class="btn btn-default" id="info">-</span>
+            <span class="btn btn-info" id="command">-</span>
         </nav>
+        <div style="position: fixed; left: 10px; top: auto;">
+            <img id="qrcode" src="{{ qrcode_url }}">
+        </div>
         <h2 class="text-center">{{ self.title() }}</h2>
         {% block content %}{% endblock %}
     </div>
     <script src="{{ url_for('public.static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('public.static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('public.static', filename='js/socket.io.js') }}"></script>
     {% block js_custom %}{% endblock %}
     <script type="text/javascript">
         $(function() {
-            // 定时刷新yiwa状态
-            function refresh_status() {
-                $.ajax({
-                    type: 'post',
-                    url: '/yiwa',
-                    data: "",
-                    cache: false,
-                    dataType: 'json',
-                    success: function(data) {
-                        console.log(data);
-                        var status = data.result.status;
-                        var caption = data.result.caption;
-                        var stt = data.result.stt;
-                        if (status === 0) {
-                            $("#status").removeClass()
-                                .addClass("btn").addClass("btn-primary");
-                            $("#explain_text").text("等待唤醒");
-                        } else if (status === 1) {
-                            $("#status").removeClass()
-                                .addClass("btn").addClass("btn-success");
-                            $("#explain_text").text("已唤醒");
-                        } else {
-                            $("#status").removeClass()
-                                .addClass("btn").addClass("btn-danger");
-                            $("#explain_text").text("出错了");
-                        }
-                        $("#caption").text(caption);
-                        $("#command").text(stt);
-                    },
-                    error: function(e) {
-                      console.log('回调yiwa错误');
-                    }
-                });
+            // websocket定时刷新yiwa状态
+            function refresh_status(data) {
+                var status = data.status;
+                var caption = data.caption;
+                var listening = data.listening;
+                var info = data.info !== "" ? data.info : "-";
+                var stt = data.stt !== "" ? data.stt : "-";
+                // 唤醒状态
+                if (status === 0) {
+                    $("#status").removeClass()
+                        .addClass("btn").addClass("btn-primary");
+                    $("#explain_text").text("等待唤醒");
+                } else if (status === 1) {
+                    $("#status").removeClass()
+                        .addClass("btn").addClass("btn-success");
+                    $("#explain_text").text("已唤醒");
+                } else {
+                    $("#status").removeClass()
+                        .addClass("btn").addClass("btn-danger");
+                    $("#explain_text").text("出错了");
+                }
+                // 提示信息
+                $("#caption").text(caption);
+                // 录音中
+                if (listening === 0) {
+                    $("#info").removeClass()
+                        .addClass("btn").addClass("btn-danger");
+                } else if (listening === 1) {
+                    $("#info").removeClass()
+                        .addClass("btn").addClass("btn-warning");
+                }
+                // 消息反馈
+                $("#info").text(info);
+                // 语音指令内容
+                $("#command").text(stt);
             }
-            refresh_status();
-            setInterval(refresh_status, 3000);
+            var namespace = '/status';
+            var websocket_url = location.protocol + '//'
+                + document.domain + ':' + location.port + namespace;
+            var socket = io.connect(websocket_url);
+            // 建立连接（发给后台）
+            socket.emit('connection_status', {});
+            // 监听回复的消息
+            socket.on('response_status',function(data){
+                console.log(data);
+                refresh_status(data);
+            });
         });
     </script>
 </body>

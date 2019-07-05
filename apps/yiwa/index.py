@@ -1,17 +1,24 @@
-from apps import app
+from apps import app, socketio
 from flask import request, jsonify, render_template
 from apps.__public._sqlite import select
 from random import choice
+from flask_socketio import emit
+import time
 
 """伊瓦视图，本应用属于家庭私有使用，不是云端集体部署，功能也是自由切换，就不使用“可插拨视图”功能了。"""
 
 
-@app.route("/yiwa", methods=["POST"])
-def yiwa():
-    if request.method == "POST":
-        sql = """SELECT status, caption, stt FROM yiwa LIMIT 1"""
-        result = select(sql)[0]
-        return jsonify(result=result)
+def yiwa_status():
+    sql = """SELECT status, caption, listening, info, stt FROM yiwa LIMIT 1"""
+    return select(sql)[0]
+
+
+@socketio.on('connection_status', namespace='/status')
+def get_status(data):
+    # 调用emit方法向前台发送消息
+    while True:
+        emit('response_status', yiwa_status())
+        time.sleep(0.5)
 
 
 @app.route("/commands")
@@ -33,7 +40,7 @@ def commands():
         row.append((_apps, choice(themes)))
         if row and (id % 3 == 0):
             result.append(row)
-            row=[]
+            row = []
     else:
         if not result and row:
             result.append(row)

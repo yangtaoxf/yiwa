@@ -6,18 +6,19 @@
 最终采用Pocketsphinx库，字典精简为仅有唤醒词。
 """
 import speech_recognition as sr
+from yiwa.log import Log
+logger = Log().logger
 
 
 def up(language="en-US"):
     """SpeechRecognition库本地离线唤醒"""
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Say something!")
         audio = r.listen(source)
     try:
         return r.recognize_sphinx(audio, language=language)
     except Exception as e:
-        print(e)
+        logger.error(f"唤醒异常，{e}")
         return ""
 
 

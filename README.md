@@ -11,7 +11,7 @@
 #### 注意
 - ！！！请申请你的百度AI应用key，方法在下面（安装教程）！！！
 - 项目难度不大，你也可以。
-- 本地部署运行文档见项目Wiki。
+- 本地部署运行文档见[项目Wiki](https://gitee.com/bobo2cj/yiwa/wikis)。
 
 #### 项目灵感
 想做的项目 家庭 语音设备 显示屏 统计 展示 提醒 告警
@@ -50,23 +50,23 @@
     打开本地预设指令对应的url地址，就此实现无鼠标语音控制页面内容展示功能。
 
 
-#### 安装教程，看Wiki
+#### 安装教程，[看Wiki](https://gitee.com/bobo2cj/yiwa/wikis)
 
-1. pip install -r requirements.txt
+1. pip install -r requirements.txt -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 2. selenium使用的谷歌驱动文件需要替换为你本地chrome对应的版本，
     下载地址：[这里选择不同版本](https://chromedriver.storage.googleapis.com/index.html)
 3. 下载好chromedriver文件后不要更改文件名，就保持chromedriver或chromedriver.exe等
 4. 最好替换自己的百度AI的key（[申请指南](https://ai.baidu.com/docs#/Begin/top)），
     配置分别在asr/configs.py和nlp/configs.py文件修改
 
-#### 使用说明（程序启动），看Wiki
+#### 使用说明（程序启动），[看Wiki](https://gitee.com/bobo2cj/yiwa/wikis)
 
 1. python3.6 web.py
 2. python3.6 yiwa.py
 3. 启动无误后，即可对着你的麦克风说话，目前支持指令：返回首页，刷新指令，显示所有指令，重启，退出（去掉了）
 
 
-#### 本地开发，看Wiki
+#### 本地开发，[看Wiki](https://gitee.com/bobo2cj/yiwa/wikis)
 
 1. 可开发基于Flask的插件页面，插件以独包形式，放入apps文件夹下，
     插件必需包含configs.py文件，并指定必需的参数:APPID :str, APPNAME :str, COMMANDS :dict
@@ -79,33 +79,49 @@
 
 #### 截图
 
-1. 等待唤醒
-![等待唤醒](https://images.gitee.com/uploads/images/2019/0629/151234_40f4dfa5_25066.jpeg "1561791886335.jpg")
+- 等待唤醒、录音中
 
-2. 唤醒成功
-![唤醒成功](https://images.gitee.com/uploads/images/2019/0629/151402_268e5fe5_25066.jpeg "1561791838738.jpg")
+![等待唤醒、录音中](https://images.gitee.com/uploads/images/2019/0705/115600_5539545b_25066.png "WX20190705-113652-录音中.png")
 
-3. 执行日志
-![执行日志](https://images.gitee.com/uploads/images/2019/0629/151309_f116664e_25066.png "WX20190629-150833@2x.png")
+- 等待唤醒、录音中
 
-4. 指令目录
-![指令目录](https://images.gitee.com/uploads/images/2019/0630/234225_74f6738c_25066.jpeg "20190630234111.jpg")
+![等待唤醒、录音结束](https://images.gitee.com/uploads/images/2019/0705/115649_3e77334c_25066.png "WX20190705-113724-录音结束.png")
 
-5. 主页样子
-![主页样子](https://images.gitee.com/uploads/images/2019/0630/234514_7b7b95f9_25066.jpeg "20190630234427.jpg")
+- 已唤醒
+
+![已唤醒](https://images.gitee.com/uploads/images/2019/0705/115823_b62dc348_25066.png "WX20190705-113821-已唤醒.png")
+
+- 执行日志
+
+![执行日志](https://images.gitee.com/uploads/images/2019/0705/115720_ff8e5e41_25066.png "WX20190705-115130@2x-指令.png")
+
+- 指令目录
+
+![指令目录](https://images.gitee.com/uploads/images/2019/0705/115759_f9f4be9f_25066.png "WX20190705-114647-指令目录.png")
+
+- 二维码
+
+![二维码](https://images.gitee.com/uploads/images/2019/0706/075010_a70cf626_25066.png "WX20190706-074009@2x-二维码.png")
 
 #### 运行时的样子
     ![树莓派+17'二手显示器，图以后补](#)
     
 #### 告诉自己
--  :white_check_mark: 休息一下
+- 休息一下
 -  :white_check_mark: 做几个页面（至少包含欢迎和指令目录）
-- 提升下语音指令匹配的速度，先采用本地词库来预匹配，找到对应插件，再接百度，缩小遍历范围
-- 做下tts文本转语音基础功能，供插件需要发出语音响应时调用
-- 接着再休息一下
-- 做个二维码生成基础功能，供插件调用，有的插件可能需要借助手机来配置，例如闹钟，通勤地点等
+-  :white_check_mark: 使用websocket刷新yiwa的唤醒状态和语音指令，下一步加入是否“正在录音”的界面标识，
+    方便用户知道什么时候该说出指令，而不是去“碰”。
+-  :white_check_mark: 提升下语音指令匹配的速度，先采用本地词库来预匹配，找到对应插件，再接百度，
+    缩小遍历范围（本地词库需要去生产词库文件，如果采用自动化去生成，对于速度没有保障，
+    故而采用[jieba分词](https://github.com/fxsjy/jieba)处理）
+-  :white_check_mark: 做下tts文本转语音基础功能，供插件需要发出语音响应时调用（缺少对不同平台的处理，
+    例如mac用mei-jia，linux用xxx，windows用xxx）
+-  :white_check_mark: 做个二维码生成基础功能，供插件调用，有的插件可能需要借助手机来配置，例如闹钟，通勤地点等
+    (渲染时需要使用自定义的render方法，看home页面的实现)
+- 接着再休息一下，失业找工作中:(
 - 做几个插件，算术题目、汉字笔顺动图展示、英语单词、惩罚记录、闹钟、上学提醒，下学期上学能用上的几个优先做
 - 再休息休息
-- 停下来优化优化
+- 停下来优化调整（部分代码替换为python的特性写法）
+- 做个在线升级和安装apps的功能，备份本地apps，从gitee拉取代码，替换apps，重启服务。
 - 做几个自己相关的插件，高德地图通勤（跨省/市）、做菜倒计时、出门检查项等
 - 后面的后面想到再加，土比亢踢牛的。。。

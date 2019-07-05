@@ -3,6 +3,7 @@
 import pyaudio
 import wave
 from asr.configs import CHUNK, FORMAT, CHANNELS, RATE
+from yiwa.db import DataConveyor
 
 """
 用Pyaudio库录制音频
@@ -19,7 +20,9 @@ def audio_record(out_file, rec_time):
 					input=True,
 					frames_per_buffer=CHUNK)
 
+	data_conveyor = DataConveyor()
 	print("Start Recording...")
+	data_conveyor.listening()
 
 	frames = []  # 录制的音频流
 	# 录制音频数据
@@ -33,6 +36,7 @@ def audio_record(out_file, rec_time):
 	p.terminate()
 
 	print("Recording Done...")
+	data_conveyor.listened()
 
 	# 保存音频文件
 	wf = wave.open(out_file, 'wb')

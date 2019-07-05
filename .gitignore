@@ -1,3 +1,16 @@
+# Customs
+.idea/
+.idea/workspace.xml
+.vscode/
+migrations/
+tmp/
+uploaded/
+*.wav
+#*.s3db
+logs/
+yiwa/logs/
+apps/__public/static/qrcode/*.png
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
